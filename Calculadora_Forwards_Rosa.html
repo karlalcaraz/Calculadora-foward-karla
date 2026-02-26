@@ -1,0 +1,171 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculadora de Forwards</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to right, #ff9ecf, #ffc3e6);
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #b30059;
+        }
+        .container {
+            background: white;
+            padding: 25px;
+            margin: 20px auto;
+            border-radius: 20px;
+            max-width: 650px;
+            box-shadow: 0 8px 20px rgba(179, 0, 89, 0.2);
+        }
+        label {
+            font-weight: bold;
+            color: #b30059;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 15px 0;
+            border-radius: 10px;
+            border: 1px solid #ff66b2;
+        }
+        button {
+            background-color: #ff4da6;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #e60073;
+        }
+        .result {
+            font-size: 18px;
+            font-weight: bold;
+            color: #b30059;
+            margin-top: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Calculadora de Forwards 💖</h1>
+
+<div class="container">
+    <label>Tipo de Forward:</label>
+    <select id="tipo" onchange="renderInputs()">
+        <option value="sinIngresos">Activo SIN ingresos</option>
+        <option value="conIngresos">Activo CON dividendos conocidos</option>
+        <option value="divisas">Forward sobre Divisas</option>
+        <option value="tasas">Forward de Tasa de Interés (FRA)</option>
+    </select>
+
+    <div id="inputs"></div>
+
+    <button onclick="calcular()">Calcular</button>
+
+    <div class="result" id="resultado"></div>
+</div>
+
+<script>
+function renderInputs() {
+    const tipo = document.getElementById("tipo").value;
+    const div = document.getElementById("inputs");
+
+    if (tipo === "sinIngresos") {
+        div.innerHTML = `
+            <label>S0 (precio spot hoy):</label>
+            <input type="number" id="S0">
+            <label>r (tasa libre de riesgo):</label>
+            <input type="number" id="r" step="0.0001">
+            <label>T (años):</label>
+            <input type="number" id="T" step="0.01">
+        `;
+    }
+    else if (tipo === "conIngresos") {
+        div.innerHTML = `
+            <label>S0 (precio spot hoy):</label>
+            <input type="number" id="S0">
+            <label>PV(D) (valor presente de dividendos):</label>
+            <input type="number" id="PVD">
+            <label>r (tasa libre de riesgo):</label>
+            <input type="number" id="r" step="0.0001">
+            <label>T (años):</label>
+            <input type="number" id="T" step="0.01">
+        `;
+    }
+    else if (tipo === "divisas") {
+        div.innerHTML = `
+            <label>S0 (MXN/USD hoy):</label>
+            <input type="number" id="S0">
+            <label>rMXN (tasa en pesos):</label>
+            <input type="number" id="rMXN" step="0.0001">
+            <label>rUSD (tasa en dólares):</label>
+            <input type="number" id="rUSD" step="0.0001">
+            <label>T (años):</label>
+            <input type="number" id="T" step="0.01">
+        `;
+    }
+    else if (tipo === "tasas") {
+        div.innerHTML = `
+            <label>F (tasa forward de mercado):</label>
+            <input type="number" id="F" step="0.0001">
+            <label>K (tasa pactada):</label>
+            <input type="number" id="K" step="0.0001">
+            <label>L (monto nocional):</label>
+            <input type="number" id="L">
+            <label>T (años del periodo):</label>
+            <input type="number" id="T" step="0.01">
+            <label>r (tasa descuento):</label>
+            <input type="number" id="r" step="0.0001">
+        `;
+    }
+}
+
+function calcular() {
+    const tipo = document.getElementById("tipo").value;
+    let resultado;
+
+    if (tipo === "sinIngresos") {
+        const S0 = parseFloat(document.getElementById("S0").value);
+        const r = parseFloat(document.getElementById("r").value);
+        const T = parseFloat(document.getElementById("T").value);
+        resultado = S0 * Math.exp(r * T);
+    }
+    else if (tipo === "conIngresos") {
+        const S0 = parseFloat(document.getElementById("S0").value);
+        const PVD = parseFloat(document.getElementById("PVD").value);
+        const r = parseFloat(document.getElementById("r").value);
+        const T = parseFloat(document.getElementById("T").value);
+        resultado = (S0 - PVD) * Math.exp(r * T);
+    }
+    else if (tipo === "divisas") {
+        const S0 = parseFloat(document.getElementById("S0").value);
+        const rMXN = parseFloat(document.getElementById("rMXN").value);
+        const rUSD = parseFloat(document.getElementById("rUSD").value);
+        const T = parseFloat(document.getElementById("T").value);
+        resultado = S0 * Math.exp((rMXN - rUSD) * T);
+    }
+    else if (tipo === "tasas") {
+        const F = parseFloat(document.getElementById("F").value);
+        const K = parseFloat(document.getElementById("K").value);
+        const L = parseFloat(document.getElementById("L").value);
+        const T = parseFloat(document.getElementById("T").value);
+        const r = parseFloat(document.getElementById("r").value);
+        resultado = (F - K) * L * T * Math.exp(-r * T);
+    }
+
+    document.getElementById("resultado").innerHTML =
+        "Resultado: " + resultado.toFixed(6);
+}
+
+renderInputs();
+</script>
+
+</body>
+</html>
